@@ -13,3 +13,7 @@
 [submodule "depends/clsocket"]
 	path = depends/clsocket
 	url = git://github.com/DFHack/clsocket.git
+[submodule "plugins/webfort"]
+	path = plugins/webfort
+	url = https://github.com/Alloyed/df-webfort.git
+	branch = ws++

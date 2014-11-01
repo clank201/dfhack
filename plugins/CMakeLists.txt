@@ -171,3 +171,8 @@ OPTION(BUILD_SKELETON "Build the skeleton plugin." OFF)
 if(BUILD_SKELETON)
     add_subdirectory(skeleton)
 endif()
+
+OPTION(BUILD_WEBFORT "Build the webfort plugin" ON)
+if(BUILD_WEBFORT)
+    add_subdirectory(webfort/server)
+endif()

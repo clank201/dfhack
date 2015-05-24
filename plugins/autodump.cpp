@@ -34,10 +34,10 @@ using namespace df::enums;
 using MapExtras::Block;
 using MapExtras::MapCache;
 
-using df::global::world;
 using df::building_stockpilest;
 
 DFHACK_PLUGIN("autodump");
+REQUIRE_GLOBAL(world);
 
 // Stockpile interface START
 static const string PERSISTENCE_KEY = "autodump/stockpiles";
@@ -220,7 +220,7 @@ struct dump_hook : public df::viewscreen_dwarfmodest
         links += sp->links.give_to_workshop.size();
         links += sp->links.take_from_workshop.size();
         bool state = monitor.isMonitored(sp);
-        
+
         if (links + 12 >= y) {
             y = dims.y2;
             OutputString(COLOR_WHITE, x, y, "Auto: ");

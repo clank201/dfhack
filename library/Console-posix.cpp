@@ -604,6 +604,7 @@ namespace DFHack
                                     raw_buffer.erase(raw_cursor,1);
                                     prompt_refresh();
                                 }
+                                break;
                             }
                             if (!read_char(seq3[0]) || !read_char(seq3[1]))
                             {
@@ -862,4 +863,16 @@ void Console::msleep (unsigned int msec)
 {
     if (msec > 1000) sleep(msec/1000000);
     usleep((msec % 1000000) * 1000);
+}
+
+bool Console::hide()
+{
+    //Warmist: don't know if it's possible...
+    return false;
+}
+
+bool Console::show()
+{
+    //Warmist: don't know if it's possible...
+    return false;
 }

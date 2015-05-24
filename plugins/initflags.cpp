@@ -12,12 +12,11 @@ using std::endl;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::d_init;
+DFHACK_PLUGIN("initflags");
+REQUIRE_GLOBAL(d_init);
 
 command_result twaterlvl(color_ostream &out, vector <string> & parameters);
 command_result tidlers(color_ostream &out, vector <string> & parameters);
-
-DFHACK_PLUGIN("initflags");
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
 {
@@ -27,7 +26,6 @@ DFhackCExport command_result plugin_init (color_ostream &out, std::vector <Plugi
         commands.push_back(PluginCommand("tidlers", "Toggle display of idlers.",
                                          tidlers, Gui::dwarfmode_hotkey));
     }
-    std::cerr << "d_init: " << sizeof(df::d_init) << endl;
     return CR_OK;
 }
 

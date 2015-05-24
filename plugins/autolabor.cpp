@@ -38,14 +38,17 @@
 
 #include "modules/MapCache.h"
 #include "modules/Items.h"
+#include "modules/Units.h"
 
 using std::string;
 using std::endl;
 using std::vector;
 using namespace DFHack;
 using namespace df::enums;
-using df::global::ui;
-using df::global::world;
+
+DFHACK_PLUGIN("autolabor");
+REQUIRE_GLOBAL(ui);
+REQUIRE_GLOBAL(world);
 
 #define ARRAY_COUNT(array) (sizeof(array)/sizeof((array)[0]))
 
@@ -90,10 +93,6 @@ enum ConfigFlags {
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
 command_result autolabor (color_ostream &out, std::vector <std::string> & parameters);
-
-// A plugin must be able to return its name and version.
-// The name string provided must correspond to the filename - autolabor.plug.so or autolabor.plug.dll in this case
-DFHACK_PLUGIN("autolabor");
 
 static void generate_labor_to_skill_map();
 
@@ -477,7 +476,9 @@ static const struct labor_default default_labor_infos[] = {
     /* PULL_LEVER */            {HAULERS, false, 1, 200, 0},
     /* REMOVE_CONSTRUCTION */   {HAULERS, false, 1, 200, 0},
     /* HAUL_WATER */            {HAULERS, false, 1, 200, 0},
-    /* GELD */                  {AUTOMATIC, false, 1, 200, 0}
+    /* GELD */                  {AUTOMATIC, false, 1, 200, 0},
+    /* BUILD_ROAD */            {AUTOMATIC, false, 1, 200, 0},
+    /* BUILD_CONSTRUCTION */    {AUTOMATIC, false, 1, 200, 0}
 };
 
 static const int responsibility_penalties[] = {
@@ -842,14 +843,20 @@ static void assign_labor(unit_labor::unit_labor labor,
         }
 
         int pool = labor_infos[labor].talent_pool();
-        if (pool < 200 && candidates.size() > 1 && pool < candidates.size())
+        if (pool < 200 && candidates.size() > 1 && abs(pool) < candidates.size())
         {
             // Sort in descending order
             std::sort(candidates.begin(), candidates.end(), [&](const int lhs, const int rhs) -> bool {
                 if (dwarf_skill[lhs] == dwarf_skill[rhs])
-                    return dwarf_skillxp[lhs] > dwarf_skillxp[rhs];
+                    if (pool > 0)
+                        return dwarf_skillxp[lhs] > dwarf_skillxp[rhs];
+                    else
+                        return dwarf_skillxp[lhs] < dwarf_skillxp[rhs];
                 else
-                    return dwarf_skill[lhs] > dwarf_skill[rhs];
+                    if (pool > 0)
+                        return dwarf_skill[lhs] > dwarf_skill[rhs];
+                    else
+                        return dwarf_skill[lhs] < dwarf_skill[rhs];
             });
 
             // Check if all dwarves have equivalent skills, usually zero
@@ -862,8 +869,8 @@ static void assign_labor(unit_labor::unit_labor labor,
             }
             else
             {
-                // Trim down to our top talents
-                candidates.resize(pool);
+                // Trim down to our top (or not) talents
+                candidates.resize(abs(pool));
             }
         }
 
@@ -1158,8 +1165,8 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
                 is_on_break = true;
         }
 
-        if (dwarfs[dwarf]->profession == profession::BABY ||
-            dwarfs[dwarf]->profession == profession::CHILD ||
+        if (Units::isBaby(dwarfs[dwarf]) ||
+            Units::isChild(dwarfs[dwarf]) ||
             dwarfs[dwarf]->profession == profession::DRUNK)
         {
             dwarf_info[dwarf].state = CHILD;
@@ -1443,7 +1450,7 @@ command_result autolabor (color_ostream &out, std::vector <std::string> & parame
         if (parameters.size() == 4)
             pool = std::stoi(parameters[3]);
 
-        if (maximum < minimum || maximum < 0 || minimum < 0 || pool < 0)
+        if (maximum < minimum || maximum < 0 || minimum < 0)
         {
             out.printerr("Syntax: autolabor <labor> <minimum> [<maximum>] [<talent pool>]\n", maximum, minimum);
             return CR_WRONG_USAGE;

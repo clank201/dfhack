@@ -17,13 +17,10 @@ using std::vector;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
-using df::global::debug_turbospeed;
-
-// dfhack interface
 DFHACK_PLUGIN("fastdwarf");
-
 DFHACK_PLUGIN_IS_ENABLED(active);
+REQUIRE_GLOBAL(world);
+using df::global::debug_turbospeed;  // not required
 
 static bool enable_fastdwarf = false;
 static bool enable_teledwarf = false;
@@ -250,6 +247,6 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
         " * 0 - Disable dwarf teleportation (default)\n"
         " * 1 - Make dwarves teleport to their destinations instantly.\n"
         ));
-    
+
     return CR_OK;
 }

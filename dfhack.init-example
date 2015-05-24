@@ -52,8 +52,9 @@ keybinding add Ctrl-Shift-F@dwarfmode forum-dwarves
 # Generic adv mode bindings  #
 ##############################
 
-keybinding add Ctrl-B adv-bodyswap
-keybinding add Ctrl-Shift-B "adv-bodyswap force"
+keybinding add Ctrl-B@dungeonmode adv-bodyswap
+keybinding add Ctrl-Shift-B@dungeonmode "adv-bodyswap force"
+keybinding add Shift-O@dungeonmode gui/companion-order
 
 ##############################
 # Generic legends bindings   #
@@ -72,8 +73,12 @@ keybinding add Ctrl-Shift-Z@dwarfmode/Default "stocks show"
 # open an overview window summarising some stocks (dfstatus)
 keybinding add Ctrl-Shift-I@dwarfmode/Default "gui/dfstatus"
 
-# q->stockpile; p - copy & paste stockpiles
+# q->stockpile - copy & paste stockpiles
 keybinding add Alt-P copystock
+
+# q->stockpile - load and save stockpile settings out of game
+keybinding add Alt-L@dwarfmode/QueryBuilding/Some/Stockpile "gui/stockpiles -load"
+keybinding add Alt-S@dwarfmode/QueryBuilding/Some/Stockpile "gui/stockpiles -save"
 
 # q->workshop - duplicate the selected job
 keybinding add Ctrl-D job-duplicate
@@ -174,6 +179,10 @@ tweak import-priority-category
 
 # Misc. UI tweaks
 tweak civ-view-agreement
+tweak fps-min
+tweak max-wheelbarrow
+tweak shift-8-scroll
+tweak tradereq-pet-gender
 
 ###########################
 # Globally acting plugins #
@@ -189,7 +198,23 @@ enable search
 enable automaterial
 
 # Other interface improvement tools
-enable dwarfmonitor mousequery automelt autotrade buildingplan resume trackstop zone stocks autochop
+# enable dwarfmonitor mousequery automelt autotrade buildingplan resume trackstop zone stocks autochop stockpiles
+enable \
+ dwarfmonitor \
+ mousequery \
+ automelt \
+ autotrade \
+ buildingplan \
+ resume \
+ trackstop \
+ zone \
+ stocks \
+ autochop \
+ stockpiles
+#end a line with a backslash to make it continue to the next line. The \ is deleted for the final command.
+# Multiline commands are ONLY supported for scripts like dfhack.init. You cannot do multiline command manually on the DFHack console.
+# You cannot extend a commented line.
+# You can comment out the extension of a line.
 
 # allow the fortress bookkeeper to queue jobs through the manager
 stockflow enable

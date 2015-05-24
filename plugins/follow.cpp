@@ -16,16 +16,15 @@
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
+DFHACK_PLUGIN("follow");
+DFHACK_PLUGIN_IS_ENABLED(is_enabled);
+REQUIRE_GLOBAL(world);
 
 command_result follow (color_ostream &out, std::vector <std::string> & parameters);
 
 df::unit *followedUnit;
 int32_t prevX, prevY, prevZ;
 uint8_t prevMenuWidth;
-
-DFHACK_PLUGIN("follow");
-DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
@@ -127,7 +126,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
         Gui::setCursorCoords(c_x - (prevX-x), c_y - (prevY-y), z);
 
     //Save this round's stuff for next time so we can monitor for changes made by the user
-    prevX = x; 
+    prevX = x;
     prevY = y;
     prevZ = z;
     prevMenuWidth = menu_width;

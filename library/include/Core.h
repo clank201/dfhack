@@ -36,6 +36,10 @@ distribution.
 
 #include "RemoteClient.h"
 
+#define DFH_MOD_SHIFT 1
+#define DFH_MOD_CTRL 2
+#define DFH_MOD_ALT 4
+
 struct WINDOW;
 
 namespace tthread
@@ -68,6 +72,7 @@ namespace DFHack
 
     enum state_change_event
     {
+        SC_UNKNOWN = -1,
         SC_WORLD_LOADED = 0,
         SC_WORLD_UNLOADED = 1,
         SC_MAP_LOADED = 2,
@@ -77,6 +82,21 @@ namespace DFHack
         SC_BEGIN_UNLOAD = 6,
         SC_PAUSED = 7,
         SC_UNPAUSED = 8
+    };
+
+    class DFHACK_EXPORT StateChangeScript
+    {
+    public:
+        state_change_event event;
+        std::string path;
+        bool save_specific;
+        StateChangeScript(state_change_event event, std::string path, bool save_specific = false)
+            :event(event), path(path), save_specific(save_specific)
+        { }
+        bool operator==(const StateChangeScript& other)
+        {
+            return event == other.event && path == other.path && save_specific == other.save_specific;
+        }
     };
 
     // Core is a singleton. Why? Because it is closely tied to SDL calls. It tracks the global state of DF.
@@ -142,6 +162,7 @@ namespace DFHack
         bool ClearKeyBindings(std::string keyspec);
         bool AddKeyBinding(std::string keyspec, std::string cmdline);
         std::vector<std::string> ListKeyBindings(std::string keyspec);
+        int8_t getModstate() { return modstate; }
 
         std::string getHackPath();
 
@@ -185,6 +206,7 @@ namespace DFHack
         void doUpdate(color_ostream &out, bool first_update);
         void onUpdate(color_ostream &out);
         void onStateChange(color_ostream &out, state_change_event event);
+        void handleLoadAndUnloadScripts(color_ostream &out, state_change_event event);
 
         Core(Core const&);              // Don't Implement
         void operator=(Core const&);    // Don't implement
@@ -216,6 +238,7 @@ namespace DFHack
             std::string cmdline;
             std::string focus;
         };
+        int8_t modstate;
 
         std::map<int, std::vector<KeyBinding> > key_bindings;
         std::map<int, bool> hotkey_states;
@@ -234,6 +257,8 @@ namespace DFHack
         bool last_pause_state;
         // Very important!
         bool started;
+        // Additional state change scripts
+        std::vector<StateChangeScript> state_change_scripts;
 
         tthread::mutex * misc_data_mutex;
         std::map<std::string,void*> misc_data_map;

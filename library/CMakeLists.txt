@@ -22,6 +22,7 @@ SET_SOURCE_FILES_PROPERTIES(${GENERATED_HDRS} PROPERTIES HEADER_FILE_ONLY TRUE G
 SET(MAIN_HEADERS
 include/Internal.h
 include/DFHack.h
+include/DFHackVersion.h
 include/Console.h
 include/Core.h
 include/ColorText.h
@@ -87,15 +88,15 @@ ENDIF()
 SET(MAIN_SOURCES_LINUX
 Console-posix.cpp
 Hooks-linux.cpp
-PlugLoad-linux.cpp
+PlugLoad-posix.cpp
 Process-linux.cpp
 )
 
 SET(MAIN_SOURCES_DARWIN
 Console-posix.cpp
-PlugLoad-darwin.cpp
-Process-darwin.cpp
 Hooks-darwin.cpp
+PlugLoad-posix.cpp
+Process-darwin.cpp
 )
 
 SET(MAIN_SOURCES_LINUX_EGGY
@@ -249,6 +250,9 @@ ELSE(WIN32)
   SET(PROJECT_LIBS psapi dfhack-tinyxml dfhack-tinythread)
 ENDIF()
 
+ADD_LIBRARY(dfhack-version STATIC DFHackVersion.cpp)
+SET_TARGET_PROPERTIES(dfhack-version PROPERTIES COMPILE_DEFINITIONS DFHACK_VERSION="${DFHACK_VERSION}")
+
 ADD_LIBRARY(dfhack SHARED ${PROJECT_SOURCES})
 ADD_DEPENDENCIES(dfhack generate_headers)
 
@@ -290,7 +294,7 @@ IF(APPLE)
     SET_TARGET_PROPERTIES(dfhack PROPERTIES SOVERSION 1.0.0)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(dfhack protobuf-lite clsocket lua ${PROJECT_LIBS})
+TARGET_LINK_LIBRARIES(dfhack protobuf-lite clsocket lua dfhack-version ${PROJECT_LIBS})
 SET_TARGET_PROPERTIES(dfhack PROPERTIES LINK_INTERFACE_LIBRARIES "")
 
 TARGET_LINK_LIBRARIES(dfhack-client protobuf-lite clsocket)
@@ -306,6 +310,12 @@ IF(UNIX)
                 DESTINATION .)
         install(PROGRAMS ${dfhack_SOURCE_DIR}/package/darwin/dfhack-run
                 DESTINATION .)
+        OPTION(INSTALL_NEW_LIBSTDCXX "Install a version of libstdc++ from GCC 4.5.4 to fix various crashes" ON)
+        IF(INSTALL_NEW_LIBSTDCXX)
+            execute_process(COMMAND bunzip2 --keep --force ${dfhack_SOURCE_DIR}/package/darwin/libstdc++.6.dylib.bz2)
+            install(PROGRAMS ${dfhack_SOURCE_DIR}/package/darwin/libstdc++.6.dylib
+                DESTINATION ./hack/)
+        ENDIF(INSTALL_NEW_LIBSTDCXX)
     else()
         # On linux, copy our version of the df launch script which sets LD_PRELOAD
         install(PROGRAMS ${dfhack_SOURCE_DIR}/package/linux/dfhack

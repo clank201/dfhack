@@ -381,15 +381,19 @@ end
 local internal = dfhack.internal
 
 internal.scripts = internal.scripts or {}
+internal.scriptPath = internal.scriptPath or {}
+internal.scriptMtime = internal.scriptMtime or {}
+internal.scriptRun = internal.scriptRun or {}
 
 local scripts = internal.scripts
+local scriptPath = internal.scriptPath
+local scriptMtime = internal.scriptMtime
+local scriptRun = internal.scriptRun
+
 local hack_path = dfhack.getHackPath()
 
-local function findScript(name)
-    local file = hack_path..'scripts/'..name..'.lua'
-    if dfhack.filesystem.exists(file) then
-        return file
-    end
+function dfhack.findScript(name)
+    local file
     file = dfhack.getSavePath()
     if file then
         file = file .. '/raw/scripts/' .. name .. '.lua'
@@ -397,7 +401,12 @@ local function findScript(name)
             return file
         end
     end
-    file = hack_path..'../raw/scripts/' .. name .. '.lua'
+    local path = dfhack.getDFPath()
+    file = path..'/raw/scripts/' .. name .. '.lua'
+    if dfhack.filesystem.exists(file) then
+        return file
+    end
+    file = path..'/hack/scripts/'..name..'.lua'
     if dfhack.filesystem.exists(file) then
         return file
     end
@@ -405,21 +414,51 @@ local function findScript(name)
 end
 
 function dfhack.run_script(name,...)
-    local file = findScript(name)
+    return dfhack.run_script_with_env(nil,name,...)
+end
+
+function dfhack.script_environment(name)
+    _, env = dfhack.run_script_with_env({moduleMode=true}, name)
+    return env
+end
+
+function dfhack.run_script_with_env(envVars,name,...)
+    local file = dfhack.findScript(name)
     if not file then
         error('Could not find script ' .. name)
     end
+    if scriptPath[name] and scriptPath[name] ~= file then
+        --new file path: must have loaded a different save or unloaded
+        scriptPath[name] = file
+        scriptMtime[file] = dfhack.filesystem.mtime(file)
+        --it is the responsibility of the script to clear its own data on unload so it's safe for us to not delete it here
+    end
+
     local env = scripts[file]
     if env == nil then
         env = {}
         setmetatable(env, { __index = base_env })
     end
-    local f,perr = loadfile(file, 't', env)
-    if f then
-        scripts[file] = env
-        return f(...)
+    for x,y in pairs(envVars or {}) do
+        env[x] = y
     end
-    error(perr)
+    local f
+    local perr
+    local time = dfhack.filesystem.mtime(file)
+    if time == scriptMtime[file] and scriptRun[file] then
+        f = scriptRun[file]
+    else
+        --reload
+        f, perr = loadfile(file, 't', env)
+        if not f then
+            error(perr)
+        end
+        -- avoid updating mtime if the script failed to load
+        scriptMtime[file] = time
+    end
+    scripts[file] = env
+    scriptRun[file] = f
+    return f(...), env
 end
 
 local function _run_command(...)
@@ -475,7 +514,7 @@ if dfhack.is_core_context then
         local env = setmetatable({ SAVE_PATH = path }, { __index = base_env })
         local f,perr = loadfile(name, 't', env)
         if f == nil then
-            if not string.match(perr, 'No such file or directory') then
+            if dfhack.filesystem.exists(name) then
                 dfhack.printerr(perr)
             end
         elseif safecall(f) then

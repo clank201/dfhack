@@ -32,14 +32,16 @@ using std::vector;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
-using df::global::ui;
-using df::global::d_init;
-using df::global::created_item_count;
-using df::global::created_item_type;
-using df::global::created_item_subtype;
-using df::global::created_item_mattype;
-using df::global::created_item_matindex;
+DFHACK_PLUGIN("strangemood");
+
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui);
+REQUIRE_GLOBAL(d_init);
+REQUIRE_GLOBAL(created_item_count);
+REQUIRE_GLOBAL(created_item_type);
+REQUIRE_GLOBAL(created_item_subtype);
+REQUIRE_GLOBAL(created_item_mattype);
+REQUIRE_GLOBAL(created_item_matindex);
 using df::global::debug_nomoods;
 
 Random::MersenneRNG rng;
@@ -474,7 +476,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
         out.printerr("ARTIFACTS are not enabled!\n");
         return CR_FAILURE;
     }
-    if (*debug_nomoods)
+    if (debug_nomoods && *debug_nomoods)
     {
         out.printerr("Strange moods disabled via debug flag!\n");
         return CR_FAILURE;
@@ -626,7 +628,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
         out.printerr("Chosen unit '%s' has active job, cannot start mood!\n", Translation::TranslateName(&unit->name, false).c_str());
         return CR_FAILURE;
     }
-    
+
     ui->mood_cooldown = 1000;
     // If no mood type was specified, pick one randomly
     if (type == mood_type::None)
@@ -694,7 +696,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     unit->mood = type;
     unit->relations.mood_copy = unit->mood;
     Gui::showAutoAnnouncement(announcement_type::STRANGE_MOOD, unit->pos, msg, color, bright);
-    
+
     // TODO: make sure unit drops any wrestle items
     unit->job.mood_timeout = 50000;
     unit->flags1.bits.has_mood = true;
@@ -1301,8 +1303,6 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     unit->unk_18e = 0;
     return CR_OK;
 }
-
-DFHACK_PLUGIN("strangemood");
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
 {

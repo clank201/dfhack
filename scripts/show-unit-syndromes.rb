@@ -179,7 +179,7 @@ def get_effect_target(target)
     if(target.mode[i].to_s() != "")
 
       items = ""
-      
+
       #case target.mode[i].to_s()
       #when "BY_TYPE"
       #  item = "type("
@@ -188,12 +188,12 @@ def get_effect_target(target)
       #when "BY_CATEGORY"
       #  item = "category("
       #end
-      
+
       if(target.key[i].to_s()!="")
         item = "#{item}#{target.key[i].to_s().capitalize()}"
       end
 
-      if target.tissue[i].to_s() != "ALL"      
+      if target.tissue[i].to_s() != "ALL"
         if(target.key[i].to_s()!="" and target.tissue[i].to_s()!="")
           item = "#{item}:"
         end
@@ -211,7 +211,7 @@ def get_effect_target(target)
   end
 
   if values.length == 0 or (values.length == 1 and values[0] == "All")
-    return ""    
+    return ""
   else
     return ", target=" + values.join(", ")
   end
@@ -272,7 +272,7 @@ def get_display_name(name, verb)
   if verb.length > 100
     verb = verb.slice(0, 100).capitalize()
   end
-  
+
   pos = verb.index(".")
   if pos == nil
     return verb.slice(0, verb.rindex(" ")).capitalize()
@@ -290,13 +290,13 @@ def get_interaction(interaction)
   #result = result + "m=#{interaction.unk_170} n=#{interaction.unk_18c} o=#{interaction.unk_1a8} p=#{interaction.unk_1c4} q=#{interaction.unk_1e8} r=#{interaction.unk_25c} "
   #result = result + "s=#{interaction.unk_278}"
 
-  if interaction.unk_25c == ""
+  if interaction.name == ""
     name = "mystery"
   else
-    name = interaction.unk_25c
+    name = interaction.name
   end
 
-  return "ability=#{get_display_name(interaction.unk_25c, interaction.unk_e4)}, delay=#{interaction.unk_278}, actionType=TODO, range=TODO, maxTargets=TODO"
+  return "ability=#{get_display_name(interaction.name, interaction.verb[0])}, delay=#{interaction.usage_delay}, actionType=TODO, range=TODO, maxTargets=TODO"
 end
 
 def get_effect_flags(flags)
@@ -563,28 +563,28 @@ def find_creature_name(id, casteid)
   end
 
   creature_name = creature.name[0].capitalize()
-  
+
   if casteid == "DEFAULT"
     return creature_name, ""
   end
-        
+
  caste = creature.caste.find{ |c| c.caste_id == casteid }
-        
+
   if caste == nil
     return creature_name, casteid
   elsif creature.name[0].downcase() == caste.caste_name[0].downcase()
     return creature_name, ""
   else
     castename = caste.caste_name[0].downcase().chomp(creature.name[0].downcase()).strip()
-        
+
     if castename.start_with?(creature.name[0])
       castename = castename.slice(creature.name[0].length, castename.length - creature.name[0].length).strip()
     end
 
     if castename.start_with?("of the")
       castename = castename.slice("of the".length, castename.length - "of the".length).strip()
-    end        
-    
+    end
+
     return creature_name, castename.downcase()
   end
 end
@@ -702,7 +702,7 @@ def get_effect(logger, ce, ticks, showdisplayeffects)
   when "DISPLAY_TILE"
     if !showdisplayeffects then return "", Output::DEFAULT end
     name = "Tile"
-    desc = "Tile=#{ce.unk_6c}, Colour=#{ce.unk_70}"
+    desc = "Tile=#{ce.tile}, Colour=#{ce.color}"
     color = Output::DEFAULT
   when "FLASH_TILE"
     if !showdisplayeffects then return "", Output::DEFAULT end
@@ -715,8 +715,8 @@ def get_effect(logger, ce, ticks, showdisplayeffects)
     name = "Physical"
     desc = "speed("
 
-    value = ce.unk_6c
-    percent = ce.unk_70
+    value = ce.bonus_add
+    percent = ce.bonus_perc
     if(value!=0)
       desc = desc + "%+d" % value
     end
@@ -745,11 +745,11 @@ def get_effect(logger, ce, ticks, showdisplayeffects)
     color = Output::GREEN
   when "SKILL_ROLL_ADJUST"
     name = "Skill check"
-    desc = "modifier=#{ce.unk_6c}%, chance=#{ce.unk_70}%"
+    desc = "modifier=#{ce.multiplier}%, chance=#{ce.chance}%"
 
-    if ce.unk_6c > 100
+    if ce.multiplier > 100
       color = Output::GREEN
-    elsif ce.unk_6c < 100
+    elsif ce.multiplier < 100
       color = Output::RED
     else
       color = Output::DEFAULT
@@ -758,59 +758,59 @@ def get_effect(logger, ce, ticks, showdisplayeffects)
   when "BODY_TRANSFORMATION"
     name = "Transformation"
 
-    if ce.unk_6c > 0
-      chance = ", chance=#{ce.unk_6c} "
+    if ce.chance > 0
+      chance = ", chance=#{ce.chance} "
     else
       chance = ""
     end
 
     creature_name = find_creature_name(ce.race_str, ce.caste_str)
-    
+
     if creature_name[1] == ""
-        desc = "#{creature_name[0]}#{chance}"    
+        desc = "#{creature_name[0]}#{chance}"
     else
-        desc = "#{creature_name[0]}(#{creature_name[1]})#{chance}"    
+        desc = "#{creature_name[0]}(#{creature_name[1]})#{chance}"
     end
-    
+
     color = Output::BLUE
   when "PHYS_ATT_CHANGE"
     name = "Physical"
-    data = get_att_pairs(ce.phys_att_unk, ce.phys_att_perc, true)
+    data = get_att_pairs(ce.phys_att_add, ce.phys_att_perc, true)
     desc = data[0]
     color = data[1]
   when "MENT_ATT_CHANGE"
     name = "Mental"
-    data = get_att_pairs(ce.ment_att_unk, ce.ment_att_perc, false)
+    data = get_att_pairs(ce.ment_att_add, ce.ment_att_perc, false)
     desc = data[0]
     color = data[1]
   when "MATERIAL_FORCE_MULTIPLIER"
     name = "Material force multiplier"
-    desc = "received damage scaled by #{(ce.unk_c8 * 100 / ce.unk_cc * 100)/100}%"
-    if ce.unk_cc > ce.unk_c8
+    desc = "received damage scaled by #{(ce.fraction_mul * 100 / ce.fraction_div * 100)/100}%"
+    if ce.fraction_div > ce.fraction_mul
       color = Output::GREEN
-    elsif ce.unk_cc < ce.unk_c8
+    elsif ce.fraction_div < ce.fraction_mul
       color = Output::RED
     else
       color = Output::DEFAULT
     end
-    
-    if ce.unk_c4 >=0
-        mat = df.decode_mat(ce.unk_c0, ce.unk_c4 )
-    elsif ce.unk_c0 >= 0
-        mat = df.decode_mat(ce.unk_c0, 0 )
+
+    if ce.mat_index >=0
+        mat = df.decode_mat(ce.mat_type, ce.mat_index )
+    elsif ce.mat_type >= 0
+        mat = df.decode_mat(ce.mat_type, 0 )
     else
         mat = nil
     end
-    
+
     if mat!= nil
       token = mat.token
       if token.start_with?("INORGANIC:")
         token = token.slice("INORGANIC:".length, token.length - "INORGANIC:".length)
       end
-      
+
       desc = "#{desc} vs #{token.capitalize()}"
-    end        
-    
+    end
+
   when "BODY_MAT_INTERACTION"
     # interactionId, SundromeTriggerType
     name = "Body material interaction"

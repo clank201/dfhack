@@ -14,13 +14,13 @@
 #include "modules/World.h"
 #include "df/item_quality.h"
 
-using df::global::world;
-using df::global::cursor;
-using df::global::ui;
 using df::building_stockpilest;
 
 DFHACK_PLUGIN("automelt");
 #define PLUGIN_VERSION 0.3
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(cursor);
+REQUIRE_GLOBAL(ui);
 
 static const string PERSISTENCE_KEY = "automelt/stockpiles";
 
@@ -226,7 +226,7 @@ struct melt_hook : public df::viewscreen_dwarfmodest
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = dims.y2 - 6;
-        
+
         int links = 0;
         links += sp->links.give_to_pile.size();
         links += sp->links.take_from_pile.size();

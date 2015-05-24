@@ -1,9 +1,183 @@
 DFHack Future
     Internals
+    Lua
+    New internal commands
+    New plugins
+    New scripts
+    New tweaks
+    New features
     Fixes
+    Removed
+    Misc Improvements
+
+DFHack 0.40.24-r3
+    Internals
+        Ruby library now included on OS X - ruby scripts should work on OS X 10.10
+        libstdc++ should work with older versions of OS X
+        Added support for onLoadMap/onUnloadMap.init scripts
+        game type detection functions are now available in the World module
+        The DFHACK_LOG_MEM_RANGES environment variable can be used to log information to stderr.log on OS X
+        Fixed adventure mode menu names
+        Fixed command usage information for some commands
+    Lua
+        Lua scripts will only be reloaded if necessary
+        Added a df2console() wrapper, useful for printing DF (CP437-encoded) text to the console in a portable way
+        Added a strerror() wrapper
+    New internal commands
+        hide/show: hide and show the console on Windows
+        sc-script: Allows additional scripts to be run when certain events occur (similar to onLoad*.init scripts)
+    New plugins
+        autohauler: A hauling-only version of autolabor
+    New scripts
+        modtools/reaction-product-trigger: triggers callbacks when products are produced (contrast with when reactions complete)
+    New tweaks
+        fps-min: Fixes the in-game minimum FPS setting
+        shift-8-scroll: Gives Shift+8 (or *) priority when scrolling menus, instead of scrolling the map
+        tradereq-pet-gender: Displays pet genders on the trade request screen
+    New features
+        autolabor: A negative pool size can be specified to use the most unskilled dwarves
+        catsplosion: Works on any specified races
+        exportlegends: Now exports more information
+    Fixes
+        Fixed game type detection in:
+            3dveins
+            createitem
+            reveal
+            seedwatch
+        Made PRELOAD_LIB more extensible on Linux
+        add-spatter, eventful: Fixed crash on world load
+        building-hacks: made buildings produce/consume correct amount of power
+        Gave add-thought a proper subthought arg.
+        fix-armory compiles and is available again (albeit with issues)
+        gui/gm-editor: Added search option (accessible with "s")
+        hack-wish: Made items stack properly.
+        modtools/skill-change: made level granularity work properly.
+        show-unit-syndromes should work
+        stockflow: Fixed error message in Arena mode
+        stockflow: No longer checks the DF version
+        stockflow: Fixed ballistic arrow head orders
+        stockflow: Now convinces the bookkeeper to update records more often
+        zone: Stopped crash when scrolling cage owner list
+    Removed
+    Misc Improvements
+        building-hacks: Added a way to allow building to work even if it consumes more power than is available. Added setPower/getPower functions.
+        catsplosion: Can now trigger pregnancies in (most) other creatures
+        exportlegends: 'info' and 'all' exports legends_plus xml with more data for legends utilities
+        manipulator:
+            Added ability to edit nicknames/profession names
+            Added "Job" as a View Type, in addition to "Profession" and "Squad"
+            Custom profession templates, with masking
+        remotefortressreader: Exposes more information
+
+DFHack 0.40.24-r2
+    Internals
+        Lua scripts can set environment variables of each other with dfhack.run_script_with_env.
+        Lua scripts can now call each others internal nonlocal functions with dfhack.script_environment(scriptName).functionName(arg1,arg2).
+        eventful Lua reactions no longer require LUA_HOOK as a prefix: you can register a callback for the completion of any reaction with a name
+        Filesystem module now provides file access/modification times and can list directories (normally and recursively)
+        Units Module: New functions:
+            isWar
+            isHunter
+            isAvailableForAdoption
+            isOwnCiv
+            isOwnRace
+            getRaceName
+            getRaceNamePlural
+            getRaceBabyName
+            getRaceChildName
+            isBaby
+            isChild
+            isAdult
+            isEggLayer
+            isGrazer
+            isMilkable
+            isTrainableWar
+            isTrainableHunting
+            isTamable
+            isMale
+            isFemale
+            isMerchant
+            isForest
+            isMarkedForSlaughter
+        Buildings Module: New Functions:
+            isActivityZone
+            isPenPasture
+            isPitPond
+            isActive
+            findPenPitAt
+    Fixes
+        dfhack.run_script should correctly find save-specific scripts now.
+        Updated add-thought to properly affect stress.
+        hfs-pit should work now
+        Autobutcher takes gelding into account
+        init.lua existence checks should be more reliable (notably when using non-English locales)
     New Plugins
     New Scripts
+    New Tweaks
+    Removed
     Misc Improvements
+        Multiline commands are now possible inside dfhack.init scripts. See dfhack.init-example for example usage.
+
+DFHack 0.40.24-r1
+    Internals
+        CMake shouldn't cache DFHACK_RELEASE anymore. People may need to manually update/delete their CMake cache files to get rid of it.
+
+DFHack 0.40.24-r0
+    Internals
+        EventManager: fixed crash error with EQUIPMENT_CHANGE event.
+        key modifier state exposed to Lua
+    Fixes
+        dfhack script can now be run from other directories on OSX
+    New Plugins
+        blueprint: export part of your fortress to quickfort .csv files
+    New Scripts
+        hotkey-notes:  print key, name, and jump position of hotkeys
+    Removed
+        embark.lua
+        needs_porting/*
+    New Tweaks
+    Misc Improvements
+        added support for searching more lists
+
+DFHack 0.40.23-r1
+    Internals
+        plugins will not be loaded if globals they specify as required are not located (should prevent some crashes)
+    Fixes
+        Fixed numerous (mostly Lua-related) crashes on OS X by including a more up-to-date libstdc++
+        Alt should no longer get stuck on Windows (and perhaps other platforms as well)
+        advfort works again
+        autobutcher takes sexualities into account
+        devel/export-dt-ini: Updated for 0.40.20+
+        digfort: now checks file type and existence
+        exportlegends: Fixed map export
+        full-heal: Fixed a problem with selecting units in the GUI
+        gui/hack-wish: Fixed restrictive material filters
+        mousequery: Changed box-select key to Alt+M
+        plugins/dwarfmonitor: correct date display (month index, separator)
+        scripts/putontable: added to the readme
+        siren should work again
+        stderr.log: removed excessive debug output on OS X
+        trackstop: No longer prevents cancelling the removal of a track stop or roller.
+        Fixed a display issue with PRINT_MODE:TEXT
+        Fixed a symbol error (MapExtras::BiomeInfo::MAX_LAYERS) when compiling DFHack in Debug mode
+    New Plugins
+        fortplan: designate construction of (limited) buildings from .csv file, quickfort-style
+    New Scripts
+        gui/stockpiles: an in-game interface for saving and loading stockpile
+          settings files.
+        position: Reports the current date, time, month, and season, plus
+            some location info.  Port/update of position.py
+        hfs-pit: Digs a hole to hell under the cursor.  Replaces needs_porting/hellhole.cpp
+    Removed
+        embark.lua: Obsolete, use `embark-tools`
+    New tweaks:
+        eggs-fertile: Displays an egg fertility indicator on nestboxes
+        max-wheelbarrow: Allows assigning more than 3 wheelbarrows to a stockpile
+    Misc Improvements
+        embark-tools: Added basic mouse support on the local map
+        Made some adventure mode keybindings in dfhack.init-example only work in adventure mode
+        Added a default keybinding for "gui/companion-order"
+        further work on needs_porting
 
 DFHack 0.40.19-r1
     Internals:

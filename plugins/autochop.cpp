@@ -1,4 +1,4 @@
-// automatically chop trees 
+// automatically chop trees
 
 #include "uicommon.h"
 
@@ -36,12 +36,10 @@ using std::set;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
-using df::global::ui;
-
 #define PLUGIN_VERSION 0.3
 DFHACK_PLUGIN("autochop");
-
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui);
 
 static bool autochop_enabled = false;
 static int min_logs, max_logs;
@@ -551,7 +549,7 @@ public:
     }
 
     std::string getFocusString() { return "autochop"; }
-    
+
     void updateAutochopBurrows()
     {
         watchedBurrows.clear();
@@ -588,7 +586,7 @@ struct autochop_hook : public df::viewscreen_dwarfmodest
         using namespace df::enums::ui_sidebar_mode;
         return (ui->main.mode == DesignateChopTrees);
     }
-    
+
     void sendKey(const df::interface_key &key)
     {
         set<df::interface_key> tmp;

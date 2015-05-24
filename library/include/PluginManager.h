@@ -24,9 +24,11 @@ distribution.
 
 #pragma once
 
+#include "DFHackVersion.h"
 #include "Export.h"
 #include "Hooks.h"
 #include "ColorText.h"
+#include "MiscUtils.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -97,6 +99,7 @@ namespace DFHack
               function(function_), interactive(interactive_),
               guard(NULL), usage(usage_)
         {
+            fix_usage();
         }
 
         PluginCommand(const char * _name,
@@ -108,6 +111,13 @@ namespace DFHack
               function(function_), interactive(false),
               guard(guard_), usage(usage_)
         {
+            fix_usage();
+        }
+
+        void fix_usage()
+        {
+            if (usage.size() && usage[usage.size() - 1] != '\n')
+                usage.push_back('\n');
         }
 
         bool isHotkeyCommand() const { return guard != NULL; }
@@ -205,6 +215,7 @@ namespace DFHack
         void reset_lua();
 
         bool *plugin_is_enabled;
+        std::vector<std::string>* plugin_globals;
         command_result (*plugin_init)(color_ostream &, std::vector <PluginCommand> &);
         command_result (*plugin_status)(color_ostream &, std::string &);
         command_result (*plugin_shutdown)(color_ostream &);
@@ -262,9 +273,11 @@ namespace DFHack
 
 /// You have to have this in every plugin you write - just once. Ideally on top of the main file.
 #define DFHACK_PLUGIN(plugin_name) \
-    DFhackDataExport const char * version = DFHACK_VERSION;\
     DFhackDataExport const char * name = plugin_name;\
-    DFhackDataExport Plugin *plugin_self = NULL;
+    DFhackDataExport const char * version = get_dfhack_version();\
+    DFhackDataExport Plugin *plugin_self = NULL;\
+    std::vector<std::string> _plugin_globals;\
+    DFhackDataExport std::vector<std::string>* plugin_globals = &_plugin_globals;
 
 #define DFHACK_PLUGIN_IS_ENABLED(varname) \
     DFhackDataExport bool plugin_is_enabled = false; \
@@ -281,3 +294,8 @@ namespace DFHack
 #define DFHACK_LUA_FUNCTION(name) { #name, df::wrap_function(name,true) }
 #define DFHACK_LUA_EVENT(name) { #name, &name##_event }
 #define DFHACK_LUA_END { NULL, NULL }
+
+#define REQUIRE_GLOBAL(global_name) \
+    using df::global::global_name; \
+    static int VARIABLE_IS_NOT_USED CONCAT_TOKENS(required_globals_, __LINE__) = \
+        (plugin_globals->push_back(#global_name), 0);

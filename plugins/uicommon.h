@@ -1,6 +1,8 @@
+#pragma once
+
 #include <algorithm>
 #include <cctype>
-#include <functional> 
+#include <functional>
 #include <locale>
 #include <map>
 #include <string>
@@ -65,7 +67,7 @@ struct coord32_t
         y = other.y;
         z = other.z;
     }
-    
+
     df::coord get_coord16() const
     {
         return df::coord(x, y, z);
@@ -84,7 +86,7 @@ static void for_each_(map<T, V> &v, Fn func)
     for_each(v.begin(), v.end(), func);
 }
 
-template <class T, class V, typename Fn> 
+template <class T, class V, typename Fn>
 static void transform_(vector<T> &src, vector<V> &dst, Fn func)
 {
     transform(src.begin(), src.end(), back_inserter(dst), func);
@@ -92,7 +94,7 @@ static void transform_(vector<T> &src, vector<V> &dst, Fn func)
 
 typedef int8_t UIColor;
 
-void OutputString(UIColor color, int &x, int &y, const std::string &text, 
+static void OutputString(UIColor color, int &x, int &y, const std::string &text,
     bool newline = false, int left_margin = 0, const UIColor bg_color = 0)
 {
     Screen::paintString(Screen::Pen(' ', color, bg_color), x, y, text);
@@ -105,7 +107,7 @@ void OutputString(UIColor color, int &x, int &y, const std::string &text,
         x += text.length();
 }
 
-void OutputHotkeyString(int &x, int &y, const char *text, const char *hotkey, bool newline = false, 
+static void OutputHotkeyString(int &x, int &y, const char *text, const char *hotkey, bool newline = false,
     int left_margin = 0, int8_t text_color = COLOR_WHITE, int8_t hotkey_color = COLOR_LIGHTGREEN)
 {
     OutputString(hotkey_color, x, y, hotkey);
@@ -114,7 +116,7 @@ void OutputHotkeyString(int &x, int &y, const char *text, const char *hotkey, bo
     OutputString(text_color, x, y, display, newline, left_margin);
 }
 
-void OutputLabelString(int &x, int &y, const char *text, const char *hotkey, const string &label, bool newline = false, 
+static void OutputLabelString(int &x, int &y, const char *text, const char *hotkey, const string &label, bool newline = false,
     int left_margin = 0, int8_t text_color = COLOR_WHITE, int8_t hotkey_color = COLOR_LIGHTGREEN)
 {
     OutputString(hotkey_color, x, y, hotkey);
@@ -125,7 +127,7 @@ void OutputLabelString(int &x, int &y, const char *text, const char *hotkey, con
     OutputString(hotkey_color, x, y, label, newline, left_margin);
 }
 
-void OutputFilterString(int &x, int &y, const char *text, const char *hotkey, bool state, bool newline = false, 
+static void OutputFilterString(int &x, int &y, const char *text, const char *hotkey, bool state, bool newline = false,
     int left_margin = 0, int8_t hotkey_color = COLOR_LIGHTGREEN)
 {
     OutputString(hotkey_color, x, y, hotkey);
@@ -133,7 +135,7 @@ void OutputFilterString(int &x, int &y, const char *text, const char *hotkey, bo
     OutputString((state) ? COLOR_WHITE : COLOR_GREY, x, y, text, newline, left_margin);
 }
 
-void OutputToggleString(int &x, int &y, const char *text, const char *hotkey, bool state, bool newline = true,
+static void OutputToggleString(int &x, int &y, const char *text, const char *hotkey, bool state, bool newline = true,
     int left_margin = 0, int8_t color = COLOR_WHITE, int8_t hotkey_color = COLOR_LIGHTGREEN)
 {
     OutputHotkeyString(x, y, text, hotkey, false, 0, color, hotkey_color);
@@ -243,13 +245,13 @@ static bool is_metal_item(df::item *item)
     return (mat.getCraftClass() == craft_material_class::Metal);
 }
 
-bool is_set_to_melt(df::item* item)
+static bool is_set_to_melt(df::item* item)
 {
     return item->flags.bits.melt;
 }
 
 // Copied from Kelly Martin's code
-bool can_melt(df::item* item)
+static bool can_melt(df::item* item)
 {
 
     df::item_flags bad_flags;
@@ -271,9 +273,9 @@ bool can_melt(df::item* item)
 
     if (!is_metal_item(item)) return false;
 
-    for (auto g = item->general_refs.begin(); g != item->general_refs.end(); g++) 
+    for (auto g = item->general_refs.begin(); g != item->general_refs.end(); g++)
     {
-        switch ((*g)->getType()) 
+        switch ((*g)->getType())
         {
         case general_ref_type::CONTAINS_ITEM:
         case general_ref_type::UNIT_HOLDER:
@@ -375,12 +377,12 @@ private:
 
 class PersistentStockpileInfo : public StockpileInfo {
 public:
-    PersistentStockpileInfo(df::building_stockpilest *sp, string persistence_key) : 
+    PersistentStockpileInfo(df::building_stockpilest *sp, string persistence_key) :
       StockpileInfo(sp), persistence_key(persistence_key)
     {
     }
 
-    PersistentStockpileInfo(PersistentDataItem &config, string persistence_key) : 
+    PersistentStockpileInfo(PersistentDataItem &config, string persistence_key) :
         config(config), persistence_key(persistence_key)
     {
         id = config.ival(1);
@@ -431,7 +433,7 @@ public:
     bool selected;
     UIColor color;
 
-    ListEntry(const string text, const T elem, const string keywords = "", const UIColor color = COLOR_UNSELECTED) : 
+    ListEntry(const string text, const T elem, const string keywords = "", const UIColor color = COLOR_UNSELECTED) :
         elem(elem), text(text), selected(false), keywords(keywords), color(color)
     {
     }
@@ -449,6 +451,7 @@ public:
     bool allow_null;
     bool auto_select;
     bool allow_search;
+    bool feed_mouse_set_highlight;
     bool feed_changed_highlight;
 
     ListColumn()
@@ -463,6 +466,7 @@ public:
         allow_null = true;
         auto_select = false;
         allow_search = true;
+        feed_mouse_set_highlight = false;
         feed_changed_highlight = false;
     }
 
@@ -527,7 +531,7 @@ public:
             ++y;
             UIColor fg_color = (display_list[i]->selected) ? COLOR_SELECTED : display_list[i]->color;
             UIColor bg_color = (is_selected_column && i == highlighted_index) ? COLOR_HIGHLIGHTED : COLOR_BLACK;
-            
+
             string item_label = display_list[i]->text;
             if (text_clip_at > 0 && item_label.length() > text_clip_at)
                 item_label.resize(text_clip_at);
@@ -568,7 +572,7 @@ public:
                 string item_string = toLower(list[i].text);
                 for (auto si = search_tokens.begin(); si != search_tokens.end(); si++)
                 {
-                    if (!si->empty() && item_string.find(*si) == string::npos && 
+                    if (!si->empty() && item_string.find(*si) == string::npos &&
                         list[i].keywords.find(*si) == string::npos)
                     {
                         include_item = false;
@@ -717,7 +721,7 @@ public:
     {
         vector<T> results = getSelectedElems(true);
         if (results.size() == 0)
-            return nullptr;
+            return (T)nullptr;
         else
             return results[0];
     }
@@ -763,7 +767,7 @@ public:
 
     bool feed(set<df::interface_key> *input)
     {
-        feed_changed_highlight = false;
+        feed_mouse_set_highlight = feed_changed_highlight = false;
         if  (input->count(interface_key::CURSOR_UP))
         {
             changeHighlight(-1);
@@ -836,7 +840,10 @@ public:
         {
             int new_index = display_start_offset + gps->mouse_y - 3;
             if (new_index < display_list.size())
+            {
                 setHighlight(new_index);
+                feed_mouse_set_highlight = true;
+            }
 
             enabler->mouse_lbut = enabler->mouse_rbut = 0;
 

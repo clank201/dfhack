@@ -26,7 +26,7 @@ namespace DFHack
     DFLibrary * OpenPlugin (const char * filename)
     {
         dlerror();
-        DFLibrary * ret =  (DFLibrary *) dlopen(filename, RTLD_NOW);
+        DFLibrary * ret =  (DFLibrary *) dlopen(filename, RTLD_NOW | RTLD_LOCAL);
         if(!ret)
         {
             std::cerr << dlerror() << std::endl;
@@ -35,7 +35,7 @@ namespace DFHack
     }
     void * LookupPlugin (DFLibrary * plugin ,const char * function)
     {
-        return (DFLibrary *) dlsym((void *)plugin, function);
+        return (void *) dlsym((void *)plugin, function);
     }
     void ClosePlugin (DFLibrary * plugin)
     {

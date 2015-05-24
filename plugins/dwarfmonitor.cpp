@@ -43,9 +43,11 @@
 
 using std::deque;
 
-using df::global::current_weather;
-using df::global::world;
-using df::global::ui;
+DFHACK_PLUGIN("dwarfmonitor");
+DFHACK_PLUGIN_IS_ENABLED(is_enabled);
+REQUIRE_GLOBAL(current_weather);
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui);
 
 typedef int16_t activity_type;
 
@@ -1107,18 +1109,14 @@ struct preference_map
         case (T_type::LikeCreature):
         {
             label = "Creature :";
-            auto creature = df::creature_raw::find(pref.creature_id);
-            if (creature)
-                label += creature->name[1];
+            Units::getRaceNamePluralById(pref.creature_id);
             break;
         }
 
         case (T_type::HateCreature):
         {
             label = "Hates    :";
-            auto creature = df::creature_raw::find(pref.creature_id);
-            if (creature)
-                label += creature->name[1];
+            Units::getRaceNamePluralById(pref.creature_id);
             break;
         }
 
@@ -1617,8 +1615,8 @@ static void update_dwarf_stats(bool is_paused)
         if (!monitor_jobs || is_paused)
             continue;
 
-        if (unit->profession == profession::BABY ||
-            unit->profession == profession::CHILD ||
+        if (Units::isBaby(unit) ||
+            Units::isChild(unit) ||
             unit->profession == profession::DRUNK)
         {
             continue;
@@ -1720,10 +1718,10 @@ struct dwarf_monitor_hook : public df::viewscreen_dwarfmodest
                 int y = 0;
 
                 ostringstream date_str;
-                auto month = World::ReadCurrentMonth();
+                auto month = World::ReadCurrentMonth() + 1;
                 auto day = World::ReadCurrentDay();
-                date_str << "Date:" << World::ReadCurrentYear() << "/" << 
-                    ((month < 10) ? "0" : "") << month << "/" << 
+                date_str << "Date:" << World::ReadCurrentYear() << "-" <<
+                    ((month < 10) ? "0" : "") << month << "-" <<
                     ((day < 10) ? "0" : "") << day;
 
                 OutputString(COLOR_GREY, x, y, date_str.str());
@@ -1774,9 +1772,6 @@ struct dwarf_monitor_hook : public df::viewscreen_dwarfmodest
 
 IMPLEMENT_VMETHOD_INTERPOSE(dwarf_monitor_hook, feed);
 IMPLEMENT_VMETHOD_INTERPOSE(dwarf_monitor_hook, render);
-
-DFHACK_PLUGIN("dwarfmonitor");
-DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
 static bool set_monitoring_mode(const string &mode, const bool &state)
 {

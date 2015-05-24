@@ -1,7 +1,7 @@
 --blood-del.lua
 --makes it so that civs won't come with barrels full of blood, ichor, or goo
 --author Urist Da Vinci
---edited by expwnent
+--edited by expwnent, scamtank
 
 local my_entity=df.historical_entity.find(df.global.ui.civ_id)
 local sText=" "
@@ -35,12 +35,22 @@ for x,y in pairs(df.global.world.entities.all) do
     my_entity.resources.misc_mat.extracts.mat_index:erase(k)
     k=k-1
    end
+   if(sText.material.id=="SWEAT") then
+    my_entity.resources.misc_mat.extracts.mat_type:erase(k)
+    my_entity.resources.misc_mat.extracts.mat_index:erase(k)
+    k=k-1
+   end
+   if(sText.material.id=="TEARS") then
+    my_entity.resources.misc_mat.extracts.mat_type:erase(k)
+    my_entity.resources.misc_mat.extracts.mat_index:erase(k)
+    k=k-1
+   end
    --VENOM
    --POISON
    --FLUID
    --MILK
    --EXTRACT
-   
+
   end
   k=k+1
  end

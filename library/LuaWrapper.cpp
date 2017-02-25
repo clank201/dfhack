@@ -448,19 +448,29 @@ Lua::ObjectClass Lua::IsDFObject(lua_State *state, int val_index)
 
 static const char *const primitive_types[] = {
     "string",
+    "ptr-string",
     "int8_t", "uint8_t", "int16_t", "uint16_t",
     "int32_t", "uint32_t", "int64_t", "uint64_t",
     "bool", "float", "double",
+    "pointer",
+    "ptr-vector",
+    "bit-vector",
+    "bit-array",
     NULL
 };
 static type_identity *const primitive_identities[] = {
     df::identity_traits<std::string>::get(),
+    df::identity_traits<const char*>::get(),
     df::identity_traits<int8_t>::get(), df::identity_traits<uint8_t>::get(),
     df::identity_traits<int16_t>::get(), df::identity_traits<uint16_t>::get(),
     df::identity_traits<int32_t>::get(), df::identity_traits<uint32_t>::get(),
     df::identity_traits<int64_t>::get(), df::identity_traits<uint64_t>::get(),
     df::identity_traits<bool>::get(),
     df::identity_traits<float>::get(), df::identity_traits<double>::get(),
+    df::identity_traits<void*>::get(),
+    df::identity_traits<std::vector<void*> >::get(),
+    df::identity_traits<std::vector<bool> >::get(),
+    df::identity_traits<BitArray<int> >::get(),
     NULL
 };
 
@@ -1310,6 +1320,18 @@ static int wtype_ipairs(lua_State *state)
     return 3;
 }
 
+static int wtype_next_item(lua_State *state)
+{
+    int first = lua_tointeger(state, lua_upvalueindex(1)),
+        last = lua_tointeger(state, lua_upvalueindex(2)),
+        cur = luaL_checkint(state, lua_gettop(state) > 1 ? 2 : 1); // 'self' optional
+    if (cur < last)
+        lua_pushinteger(state, cur + 1);
+    else
+        lua_pushinteger(state, first);
+    return 1;
+}
+
 static void RenderTypeChildren(lua_State *state, const std::vector<compound_identity*> &children);
 
 void LuaWrapper::AssociateId(lua_State *state, int table, int val, const char *name)
@@ -1346,6 +1368,11 @@ static void FillEnumKeys(lua_State *state, int ix_meta, int ftable, enum_identit
         lua_pushinteger(state, eid->getLastItem());
         lua_pushcclosure(state, wtype_ipairs, 3);
         lua_setfield(state, ix_meta, "__ipairs");
+
+        lua_pushinteger(state, eid->getFirstItem());
+        lua_pushinteger(state, eid->getLastItem());
+        lua_pushcclosure(state, wtype_next_item, 2);
+        lua_setfield(state, ftable, "next_item");
 
         lua_pushinteger(state, eid->getFirstItem());
         lua_setfield(state, ftable, "_first_item");

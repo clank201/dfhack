@@ -7,6 +7,7 @@
 #include "modules/Materials.h"
 #include "modules/Translation.h"
 #include "modules/Items.h"
+#include "modules/Units.h"
 
 #include "DataDefs.h"
 #include "df/world.h"
@@ -25,7 +26,8 @@ using std::vector;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
+DFHACK_PLUGIN("showmood");
+REQUIRE_GLOBAL(world);
 
 command_result df_showmood (color_ostream &out, vector <string> & parameters)
 {
@@ -67,7 +69,7 @@ command_result df_showmood (color_ostream &out, vector <string> & parameters)
             out.printerr("Dwarf with strange mood does not have a mood type!\n");
             continue;
         }
-        out.print("%s is currently ", Translation::TranslateName(&unit->name, false).c_str());
+        out.print("%s is currently ", DF2CONSOLE(Translation::TranslateName(&unit->name, false)).c_str());
         switch (unit->mood)
         {
         case mood_type::Macabre:
@@ -152,7 +154,7 @@ command_result df_showmood (color_ostream &out, vector <string> & parameters)
             break;
         }
         out.print(".\n");
-        if (unit->sex)
+        if (Units::isMale(unit))
             out.print("He has ");
         else
             out.print("She has ");
@@ -290,8 +292,6 @@ command_result df_showmood (color_ostream &out, vector <string> & parameters)
 
     return CR_OK;
 }
-
-DFHACK_PLUGIN("showmood");
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
 {

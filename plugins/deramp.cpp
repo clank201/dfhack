@@ -14,9 +14,8 @@ using std::string;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
-
 DFHACK_PLUGIN("deramp");
+REQUIRE_GLOBAL(world);
 
 command_result df_deramp (color_ostream &out, vector <string> & parameters)
 {
@@ -84,7 +83,7 @@ command_result df_deramp (color_ostream &out, vector <string> & parameters)
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
-        "deramp", "De-ramp. All ramps marked for removal are replaced with floors.",
+        "deramp", "Replace all ramps marked for removal with floors.",
         df_deramp, false,
         "  If there are any ramps designated for removal, they will be instantly\n"
         "  removed. Any ramps that don't have their counterpart will also be removed\n"

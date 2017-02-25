@@ -125,6 +125,35 @@ std::string toLower(const std::string &str)
     return rv;
 }
 
+bool word_wrap(std::vector<std::string> *out, const std::string &str, size_t line_length)
+{
+    out->clear();
+    std::istringstream input(str);
+    std::string out_line;
+    std::string word;
+    if (input >> word)
+    {
+        out_line += word;
+        // size_t remaining = line_length - std::min(line_length, word.length());
+        while (input >> word)
+        {
+            if (out_line.length() + word.length() + 1 <= line_length)
+            {
+                out_line += ' ';
+                out_line += word;
+            }
+            else
+            {
+                out->push_back(out_line);
+                out_line = word;
+            }
+        }
+        if (out_line.length())
+            out->push_back(out_line);
+    }
+    return true;
+}
+
 bool prefix_matches(const std::string &prefix, const std::string &key, std::string *tail)
 {
     size_t ksize = key.size();
@@ -346,4 +375,20 @@ std::string UTF2DF(const std::string &in)
     if (pos != size)
         out.resize(pos);
     return out;
+}
+
+DFHACK_EXPORT std::string DF2CONSOLE(const std::string &in)
+{
+    bool is_utf = false;
+#ifdef LINUX_BUILD
+    std::string locale = "";
+    if (getenv("LANG"))
+        locale += getenv("LANG");
+    if (getenv("LC_CTYPE"))
+        locale += getenv("LC_CTYPE");
+    locale = toUpper(locale);
+    is_utf = (locale.find("UTF-8") != std::string::npos) ||
+             (locale.find("UTF8") != std::string::npos);
+#endif
+    return is_utf ? DF2UTF(in) : in;
 }

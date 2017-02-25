@@ -46,12 +46,12 @@ using namespace df::enums;
 
 using MapExtras::Block;
 using MapExtras::MapCache;
-using df::global::world;
+
+DFHACK_PLUGIN("forceequip");
+REQUIRE_GLOBAL(world);
 
 const int const_GloveRightHandedness = 1;
 const int const_GloveLeftHandedness = 2;
-
-DFHACK_PLUGIN("forceequip");
 
 command_result df_forceequip(color_ostream &out, vector <string> & parameters);
 
@@ -216,7 +216,7 @@ const string forceequip_help =
 DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
-        "forceequip", "Moves local items from the ground into a unit's inventory",
+        "forceequip", "Move items from the ground into a unit's inventory",
         df_forceequip, false,
         forceequip_help.c_str()
     ));

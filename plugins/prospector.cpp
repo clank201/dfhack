@@ -18,6 +18,7 @@ using namespace std;
 #include "Console.h"
 #include "Export.h"
 #include "PluginManager.h"
+#include "modules/Gui.h"
 #include "modules/MapCache.h"
 
 #include "MiscUtils.h"
@@ -38,8 +39,10 @@ using namespace std;
 
 using namespace DFHack;
 using namespace df::enums;
-using df::global::world;
 using df::coord2d;
+
+DFHACK_PLUGIN("prospector");
+REQUIRE_GLOBAL(world);
 
 struct matdata
 {
@@ -151,7 +154,7 @@ void printMats(color_ostream &con, MatMap &mat, std::vector<T*> &materials, bool
     {
         if(it->first >= materials.size())
         {
-            con << "Bad index: " << it->first << " out of " 
+            con << "Bad index: " << it->first << " out of "
                 <<  materials.size() << endl;
             continue;
         }
@@ -197,8 +200,6 @@ void printVeins(color_ostream &con, MatMap &mat_map,
 }
 
 command_result prospector (color_ostream &out, vector <string> & parameters);
-
-DFHACK_PLUGIN("prospector");
 
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
@@ -575,7 +576,8 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
     CoreSuspender suspend;
 
     // Embark screen active: estimate using world geology data
-    if (VIRTUAL_CAST_VAR(screen, df::viewscreen_choose_start_sitest, Core::getTopViewscreen()))
+    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    if (screen)
         return embark_prospector(con, screen, showHidden, showValue);
 
     if (!Maps::IsValid())

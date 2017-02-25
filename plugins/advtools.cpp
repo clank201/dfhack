@@ -37,13 +37,25 @@
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
-using df::global::ui_advmode;
-
 using df::nemesis_record;
 using df::historical_figure;
 
 using namespace DFHack::Translation;
+/*
+advtools
+========
+A package of different adventure mode tools.  Usage:
+
+:list-equipped [all]:   List armor and weapons equipped by your companions.
+                        If all is specified, also lists non-metal clothing.
+:metal-detector [all-types] [non-trader]:
+                        Reveal metal armor and weapons in shops. The options
+                        disable the checks on item type and being in shop.
+*/
+
+DFHACK_PLUGIN("advtools");
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui_advmode);
 
 /*********************
  *  PLUGIN INTERFACE *
@@ -53,8 +65,6 @@ static bool bodyswap_hotkey(df::viewscreen *top);
 
 command_result adv_bodyswap (color_ostream &out, std::vector <std::string> & parameters);
 command_result adv_tools (color_ostream &out, std::vector <std::string> & parameters);
-
-DFHACK_PLUGIN("advtools");
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
 {

@@ -321,6 +321,10 @@ DFHACK_EXPORT std::string join_strings(const std::string &separator, const std::
 DFHACK_EXPORT std::string toUpper(const std::string &str);
 DFHACK_EXPORT std::string toLower(const std::string &str);
 
+DFHACK_EXPORT bool word_wrap(std::vector<std::string> *out,
+                             const std::string &str,
+                             size_t line_length = 80);
+
 inline bool bits_match(unsigned required, unsigned ok, unsigned mask)
 {
     return (required & mask) == (required & mask & ok);
@@ -348,3 +352,4 @@ DFHACK_EXPORT std::string stl_vsprintf(const char *fmt, va_list args);
 // Conversion between CP437 and UTF-8
 DFHACK_EXPORT std::string UTF2DF(const std::string &in);
 DFHACK_EXPORT std::string DF2UTF(const std::string &in);
+DFHACK_EXPORT std::string DF2CONSOLE(const std::string &in);

@@ -5,6 +5,7 @@
 #include <modules/Gui.h>
 #include <modules/Screen.h>
 #include <modules/Maps.h>
+#include <modules/World.h>
 #include <TileTypes.h>
 #include <vector>
 #include <cstdio>
@@ -117,13 +118,13 @@ using std::set;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::gps;
-using df::global::world;
-using df::global::ui;
-using df::global::ui_build_selector;
-using df::global::cursor;
-
 DFHACK_PLUGIN("steam-engine");
+
+REQUIRE_GLOBAL(gps);
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui);
+REQUIRE_GLOBAL(ui_build_selector);
+REQUIRE_GLOBAL(cursor);
 
 /*
  * List of known steam engine workshop raws.
@@ -978,8 +979,8 @@ static void enable_hooks(bool enable)
 DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_change_event event)
 {
     switch (event) {
-    case SC_WORLD_LOADED:
-        if (find_engines(out))
+    case SC_MAP_LOADED:
+        if (World::isFortressMode() && find_engines(out))
         {
             out.print("Detected steam engine workshops - enabling plugin.\n");
             enable_hooks(true);
@@ -987,7 +988,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
         else
             enable_hooks(false);
         break;
-    case SC_WORLD_UNLOADED:
+    case SC_MAP_UNLOADED:
         enable_hooks(false);
         engines.clear();
         break;

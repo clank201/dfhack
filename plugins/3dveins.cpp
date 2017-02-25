@@ -3,6 +3,7 @@
 #include <map>
 #include <algorithm>
 #include <vector>
+#include <math.h>
 
 #include "Core.h"
 #include "Console.h"
@@ -10,6 +11,7 @@
 #include "PluginManager.h"
 #include "modules/MapCache.h"
 #include "modules/Random.h"
+#include "modules/World.h"
 
 #include "MiscUtils.h"
 
@@ -41,12 +43,11 @@ using namespace DFHack;
 using namespace MapExtras;
 using namespace DFHack::Random;
 
-using df::global::world;
-using df::global::gametype;
+DFHACK_PLUGIN("3dveins");
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(gametype);
 
 command_result cmd_3dveins(color_ostream &out, std::vector <std::string> & parameters);
-
-DFHACK_PLUGIN("3dveins");
 
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
@@ -1627,7 +1628,7 @@ command_result cmd_3dveins(color_ostream &con, std::vector<std::string> & parame
         return CR_FAILURE;
     }
 
-    if (*gametype != game_type::DWARF_MAIN && *gametype != game_type::DWARF_RECLAIM)
+    if (!World::isFortressMode())
     {
         con.printerr("Must be used in fortress mode!\n");
         return CR_FAILURE;

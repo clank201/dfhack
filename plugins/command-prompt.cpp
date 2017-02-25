@@ -22,9 +22,10 @@
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::ui;
-using df::global::gps;
-using df::global::enabler;
+DFHACK_PLUGIN("command-prompt");
+REQUIRE_GLOBAL(ui);
+REQUIRE_GLOBAL(gps);
+REQUIRE_GLOBAL(enabler);
 
 std::vector<std::string> command_history;
 
@@ -50,12 +51,16 @@ public:
     void help() { }
     int8_t movies_okay() { return 0; }
 
+    df::unit* getSelectedUnit() { return Gui::getAnyUnit(parent); }
+    df::item* getSelectedItem() { return Gui::getAnyItem(parent); }
+    df::building* getSelectedBuilding() { return Gui::getAnyBuilding(parent); }
+
     std::string getFocusString() { return "commandprompt"; }
-    viewscreen_commandpromptst(std::string entry):is_response(false)
+    viewscreen_commandpromptst(std::string entry):is_response(false), submitted(false)
     {
         show_fps=gps->display_frames;
         gps->display_frames=0;
-        cursor_pos = 0;
+        cursor_pos = entry.size();
         frame = 0;
         history_idx = command_history.size();
         if (history_idx > 0)
@@ -122,6 +127,7 @@ protected:
     std::list<std::pair<color_value,std::string> > responses;
     int cursor_pos;
     int history_idx;
+    bool submitted;
     bool is_response;
     bool show_fps;
     int frame;
@@ -189,6 +195,9 @@ void viewscreen_commandpromptst::submit()
         Screen::dismiss(this);
         return;
     }
+    if(submitted)
+        return;
+    submitted = true;
     prompt_ostream out(this);
     Core::getInstance().runCommand(out, get_entry());
     if(out.empty() && responses.empty())
@@ -299,7 +308,7 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
         frame = 0;
 
 }
-DFHACK_PLUGIN("command-prompt");
+
 command_result show_prompt(color_ostream &out, std::vector <std::string> & parameters)
 {
     if (Gui::getCurFocus() == "dfhack/commandprompt")
@@ -309,7 +318,7 @@ command_result show_prompt(color_ostream &out, std::vector <std::string> & param
     std::string params;
     for(size_t i=0;i<parameters.size();i++)
         params+=parameters[i]+" ";
-    Screen::show(new viewscreen_commandpromptst(params));
+    Screen::show(new viewscreen_commandpromptst(params), plugin_self);
     return CR_OK;
 }
 bool hotkey_allow_all(df::viewscreen *top)
@@ -322,6 +331,11 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
         "command-prompt","Shows a command prompt on window.",show_prompt,hotkey_allow_all,
         "command-prompt [entry] - shows a cmd prompt in df window. Entry is used for default prefix (e.g. ':lua')"
         ));
+    return CR_OK;
+}
+
+DFhackCExport command_result plugin_onstatechange (color_ostream &out, state_change_event e)
+{
     return CR_OK;
 }
 

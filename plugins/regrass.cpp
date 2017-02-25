@@ -22,9 +22,8 @@ using std::vector;
 using namespace std;
 using namespace DFHack;
 
-using df::global::world;
-
 DFHACK_PLUGIN("regrass");
+REQUIRE_GLOBAL(world);
 
 command_result df_regrass (color_ostream &out, vector <string> & parameters);
 
@@ -61,7 +60,7 @@ command_result df_regrass (color_ostream &out, vector <string> & parameters)
         // check block for grass events before looking at 16x16 tiles
         df::block_square_event_grassst * grev = NULL;
         for(size_t e=0; e<cur->block_events.size(); e++)
-        {            
+        {
             df::block_square_event * blev = cur->block_events[e];
             df::block_square_event_type blevtype = blev->getType();
             if(blevtype == df::block_square_event_type::grass)
@@ -104,7 +103,7 @@ command_result df_regrass (color_ostream &out, vector <string> & parameters)
                 if(max)
                 {
                     for(size_t e=0; e<cur->block_events.size(); e++)
-                    {            
+                    {
                         df::block_square_event * blev = cur->block_events[e];
                         df::block_square_event_type blevtype = blev->getType();
                         if(blevtype == df::block_square_event_type::grass)
@@ -119,7 +118,7 @@ command_result df_regrass (color_ostream &out, vector <string> & parameters)
                     // try to find the 'original' event
                     bool regrew = false;
                     for(size_t e=0; e<cur->block_events.size(); e++)
-                    {            
+                    {
                         df::block_square_event * blev = cur->block_events[e];
                         df::block_square_event_type blevtype = blev->getType();
                         if(blevtype == df::block_square_event_type::grass)
@@ -139,7 +138,7 @@ command_result df_regrass (color_ostream &out, vector <string> & parameters)
                     {
                         vector <df::block_square_event_grassst *> gr_evs;
                         for(size_t e=0; e<cur->block_events.size(); e++)
-                        {            
+                        {
                             df::block_square_event * blev = cur->block_events[e];
                             df::block_square_event_type blevtype = blev->getType();
                             if(blevtype == df::block_square_event_type::grass)

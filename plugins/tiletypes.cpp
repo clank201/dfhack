@@ -44,7 +44,8 @@ using namespace MapExtras;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
+DFHACK_PLUGIN("tiletypes");
+REQUIRE_GLOBAL(world);
 
 CommandHistory tiletypes_hist;
 
@@ -53,15 +54,13 @@ command_result df_tiletypes_command (color_ostream &out, vector <string> & param
 command_result df_tiletypes_here (color_ostream &out, vector <string> & parameters);
 command_result df_tiletypes_here_point (color_ostream &out, vector <string> & parameters);
 
-DFHACK_PLUGIN("tiletypes");
-
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
     tiletypes_hist.load("tiletypes.history");
     commands.push_back(PluginCommand("tiletypes", "Paint map tiles freely, similar to liquids.", df_tiletypes, true));
-    commands.push_back(PluginCommand("tiletypes-command", "Run the given commands (seperated by ' ; '; an empty command is the same as run).", df_tiletypes_command));
-    commands.push_back(PluginCommand("tiletypes-here", "Use the last settings from tiletypes, including brush, at cursor location.", df_tiletypes_here));
-    commands.push_back(PluginCommand("tiletypes-here-point", "Use the last settings from tiletypes, not including brush, at cursor location.", df_tiletypes_here_point));
+    commands.push_back(PluginCommand("tiletypes-command", "Run tiletypes commands (seperated by ' ; ')", df_tiletypes_command));
+    commands.push_back(PluginCommand("tiletypes-here", "Repeat tiletypes command at cursor (with brush)", df_tiletypes_here));
+    commands.push_back(PluginCommand("tiletypes-here-point", "Repeat tiletypes command at cursor (without brush)", df_tiletypes_here_point));
     return CR_OK;
 }
 

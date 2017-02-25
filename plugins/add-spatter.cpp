@@ -41,14 +41,13 @@ using std::stack;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::gps;
-using df::global::world;
-using df::global::ui;
-
-typedef df::reaction_product_item_improvementst improvement_product;
-
 DFHACK_PLUGIN("add-spatter");
 DFHACK_PLUGIN_IS_ENABLED(is_enabled);
+REQUIRE_GLOBAL(gps);
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui);
+
+typedef df::reaction_product_item_improvementst improvement_product;
 
 struct ReagentSource {
     int idx;
@@ -244,11 +243,13 @@ struct product_hook : improvement_product {
 
     DEFINE_VMETHOD_INTERPOSE(
         void, produce,
-        (df::unit *unit, std::vector<df::item*> *out_items,
+        (df::unit *unit,
+         std::vector<df::reaction_product*> *out_products,
+         std::vector<df::item*> *out_items,
          std::vector<df::reaction_reagent*> *in_reag,
          std::vector<df::item*> *in_items,
          int32_t quantity, df::job_skill skill,
-         df::historical_entity *entity, df::world_site *site)
+         df::historical_entity *entity, int32_t unk, df::world_site *site, void* unk2)
     ) {
         if (auto product = products[this])
         {
@@ -294,7 +295,7 @@ struct product_hook : improvement_product {
             return;
         }
 
-        INTERPOSE_NEXT(produce)(unit, out_items, in_reag, in_items, quantity, skill, entity, site);
+        INTERPOSE_NEXT(produce)(unit, out_products, out_items, in_reag, in_items, quantity, skill, entity, unk, site, unk2);
     }
 };
 

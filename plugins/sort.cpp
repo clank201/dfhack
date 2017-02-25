@@ -16,7 +16,6 @@
 #include "df/viewscreen_joblistst.h"
 #include "df/viewscreen_unitlistst.h"
 #include "df/viewscreen_layer_militaryst.h"
-#include "df/viewscreen_layer_workshop_profilest.h"
 #include "df/viewscreen_layer_noblelistst.h"
 #include "df/viewscreen_layer_overall_healthst.h"
 #include "df/viewscreen_layer_assigntradest.h"
@@ -24,6 +23,7 @@
 #include "df/viewscreen_dwarfmodest.h"
 #include "df/viewscreen_petst.h"
 #include "df/viewscreen_storesst.h"
+#include "df/viewscreen_workshop_profilest.h"
 #include "df/layer_object_listst.h"
 #include "df/assign_trade_status.h"
 
@@ -37,22 +37,21 @@ using std::endl;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::ui;
-using df::global::world;
-using df::global::ui_building_in_assign;
-using df::global::ui_building_item_cursor;
-using df::global::ui_building_assign_type;
-using df::global::ui_building_assign_is_marked;
-using df::global::ui_building_assign_units;
-using df::global::ui_building_assign_items;
+DFHACK_PLUGIN("sort");
+REQUIRE_GLOBAL(ui);
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui_building_in_assign);
+REQUIRE_GLOBAL(ui_building_item_cursor);
+REQUIRE_GLOBAL(ui_building_assign_type);
+REQUIRE_GLOBAL(ui_building_assign_is_marked);
+REQUIRE_GLOBAL(ui_building_assign_units);
+REQUIRE_GLOBAL(ui_building_assign_items);
 
 static bool unit_list_hotkey(df::viewscreen *top);
 static bool item_list_hotkey(df::viewscreen *top);
 
 static command_result sort_units(color_ostream &out, vector <string> & parameters);
 static command_result sort_items(color_ostream &out, vector <string> & parameters);
-
-DFHACK_PLUGIN("sort");
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
 {
@@ -311,23 +310,6 @@ DEFINE_SORT_HANDLER(unit_sorters, layer_military, "/Positions/Candidates", milit
 }
 
 
-/*
- * Sort units in the workshop 'q'uery 'P'rofile modification screen.
- */
-
-DEFINE_SORT_HANDLER(unit_sorters, layer_workshop_profile, "/Unit", profile)
-{
-    auto list1 = getLayerList(profile, 0);
-
-    PARSE_SPEC("units", parameters);
-
-    if (compute_order(*pout, L, top, &order, profile->workers))
-    {
-        reorder_cursor(&list1->cursor, order);
-        reorder_vector(&profile->workers, order);
-    }
-}
-
 DEFINE_SORT_HANDLER(unit_sorters, layer_noblelist, "/Appoint", nobles)
 {
     auto list2 = getLayerList(nobles, 1);
@@ -441,6 +423,21 @@ DEFINE_SORT_HANDLER(unit_sorters, dwarfmode, "/QueryBuilding/Some/Assign", scree
             reorder_vector(ui_building_assign_items, order);
             reorder_vector(ui_building_assign_is_marked, order);
         }
+    }
+}
+
+/*
+ * Sort units in the workshop 'q'uery 'P'rofile modification screen.
+ */
+
+DEFINE_SORT_HANDLER(unit_sorters, workshop_profile, "/Unit", profile)
+{
+    PARSE_SPEC("units", parameters);
+
+    if (compute_order(*pout, L, top, &order, profile->workers))
+    {
+        reorder_cursor(&profile->worker_idx, order);
+        reorder_vector(&profile->workers, order);
     }
 }
 

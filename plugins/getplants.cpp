@@ -22,7 +22,8 @@ using std::set;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
+DFHACK_PLUGIN("getplants");
+REQUIRE_GLOBAL(world);
 
 command_result df_getplants (color_ostream &out, vector <string> & parameters)
 {
@@ -148,12 +149,10 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFHACK_PLUGIN("getplants");
-
 DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
-        "getplants", "Cut down all of the specified trees or gather specified shrubs",
+        "getplants", "Cut down trees or gather shrubs by ID",
         df_getplants, false,
         "  Specify the types of trees to cut down and/or shrubs to gather by their\n"
         "  plant IDs, separated by spaces.\n"
